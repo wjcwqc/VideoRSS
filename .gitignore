@@ -1,0 +1,11 @@
+.gitignore
+test.py
+list.json
+feed.xml
+main.pyw
+beta.py
+beta.json
+output.xml
+test.xml
+templist.txt
+TODO.md

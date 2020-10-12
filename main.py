@@ -11,7 +11,7 @@ urlist = {'v.qq.com': 'tencent',
           }
 bilimd = "https://api.bilibili.com/pgc/review/user?media_id="
 biliss = "https://api.bilibili.com/pgc/web/season/section?season_id="
-bimilink = "https://www.bimiacg.com"
+bimilink = "http://www.bimiacg.com"
 
 
 class TencentLenError(Exception):
