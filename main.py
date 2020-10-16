@@ -8,7 +8,7 @@ urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
           'www.bimiacg.com': 'bimiacg',
           'manga.bilibili.com': 'bilimanga',
-          'spcae.bilibili.com': 'bilichannel'
+          'space.bilibili.com': 'bilichannel'
           }
 bilimd = "https://api.bilibili.com/pgc/review/user?media_id="
 biliss = "https://api.bilibili.com/pgc/web/season/section?season_id="
