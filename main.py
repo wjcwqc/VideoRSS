@@ -92,25 +92,28 @@ class UpdateInfo:
     # bilibili数据采集
     def bilibili(self):
         md_id = self.url.split('/')[5].split('md')[1]
+        # rubbish way to get title and ep
         try:
-            result = requests.get(bilimd + md_id).content
+            result = requests.get(bilimd, params={'media_id': md_id}).content
         except Exception:
             time.sleep(10)
-            result = requests.get(bilimd + md_id).content
-        self.title = json.loads(result)['result']['media']['title']
-        self.ep = json.loads(result)['result']['media']['new_ep']['index']
-        result = requests.get(biliss + md_id).content
-        self.link = json.loads(result)['result']['main_section']['episodes'][int(self.ep) - 1]['share_url']
+            result = requests.get(bilimd, params={'media_id': md_id}).content
+        result = json.loads(result)['result']['media']
+        self.title = result['title']
+        self.ep = result['new_ep']['index']
+        self.link = biliep + str(result['new_ep']['id'])
+        # result = requests.get(biliss,params={'season_id':md_id}).content
+        # self.link = json.loads(result)['result']['main_section']['episodes'][int(self.ep) - 1]['share_url']
+        print(self.link)
         return
 
     # bimiacg数据采集
     def bimiacg(self):
-        # md_id = self.url.split('/')[5]
         try:
             result = bsp(requests.get(self.url).content, 'html5lib')
         except Exception:
             time.sleep(10)
-            result = bsp(requests.get(self.url).contents, 'html5lib')
+            result = bsp(requests.get(self.url).content, 'html5lib')
         self.title = result.head.title.text.split('无修版-百度云盘-动漫全集在线观看-bimibimi')[0]
         result = result.find('ul', {"class": "player_list"}).find_all('li')[-1]
         self.ep = result.text
@@ -121,6 +124,14 @@ class UpdateInfo:
         pass
         return
 
+    def bilichannel(self):
+        biliuid, bilicid = self.url.split('/')[3], self.url.split('cid=')[1]
+        result = json.loads(requests.get(bilich,
+                                         params={'mid': biliuid, 'cid': bilicid}).content)
+        result = result['data']['list']['archives'][0]
+        self.title = result['title']
+        self.ep = result['bvid']
+        self.link = "https://bilibili.com/" + self.ep
 
 def main():
     # flag = False
