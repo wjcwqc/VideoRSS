@@ -1,10 +1,8 @@
+.idea
 test.py
-list.json
-feed.xml
-main.pyw
-beta.py
-beta.json
-output.xml
-test.xml
+*.json
+*.xml
+*.pyw
+beta.*
 templist.txt
 TODO.md
