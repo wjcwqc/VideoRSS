@@ -10,11 +10,11 @@ urlist = {'v.qq.com': 'tencent',
           'manga.bilibili.com': 'bilimanga',
           'space.bilibili.com': 'bilichannel'
           }
-bilimd = "https://api.bilibili.com/pgc/review/user?media_id="
-biliss = "https://api.bilibili.com/pgc/web/season/section?season_id="
+bilimd = "https://api.bilibili.com/pgc/review/user"
+biliss = "https://api.bilibili.com/pgc/web/season/section"
 bimilink = "http://www.bimiacg.com"
 bilich = "https://api.bilibili.com/x/space/channel/video"
-
+biliep = "https://www.bilibili.com/bangumi/play/ep"
 
 class TencentLenError(Exception):
     def __init__(self, message='text is not as long as contents'):
@@ -106,7 +106,7 @@ class UpdateInfo:
         self.link = biliep + str(result['new_ep']['id'])
         # result = requests.get(biliss,params={'season_id':md_id}).content
         # self.link = json.loads(result)['result']['main_section']['episodes'][int(self.ep) - 1]['share_url']
-        print(self.link)
+        # print(self.link)
         return
 
     # bimiacg数据采集
