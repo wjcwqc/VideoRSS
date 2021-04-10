@@ -1,12 +1,16 @@
 # 视频订阅器
-从我的需求出发写的rss订阅器，目前支持bilibili，bimiacg和tx订阅单剧，系列剧集暂无法全部订阅。  
+从我的需求出发写的rss订阅器，目前支持
+bilibili番剧剧集
+bimiacg
+腾讯视频剧集
+
 # 使用方法 
-1. 将`main.py` 文件放到服务器某一文件夹(假定为VideoRSS)下，最好在给予744权限  
+1. 将`main.py` 文件放到服务器某一文件夹(假定为VideoRSS)下，最好在给予755权限  
     ```
-    apt install -y git
+    sudo apt install -y git
     cd ~
     git clone https://github.com/wjcwqc/VideoRSS
-    chmod 774 VideoRSS
+    chmod 755 VideoRSS
     cd VideoRSS
     ```
 1. 创建feed.xml和list.json 两个文件，写入以下内容
@@ -50,12 +54,7 @@
     ```
 
 1. 编辑启动脚本并添加到cron
-    run.sh
+
     
-    ``` 
-    cd ~/VideoRSS
-    python3 main.py 
-    cp -f feed.xml /var/www/html/feed.xml
-    ```
 
 1. finish already

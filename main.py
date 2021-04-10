@@ -16,6 +16,7 @@ bimilink = "http://www.bimiacg.com"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
+
 class TencentLenError(Exception):
     def __init__(self, message='text is not as long as contents'):
         super().__init__(message)
@@ -38,7 +39,7 @@ class UpdateInfo:
         nowele = ET.SubElement(feedsrc[0], 'item')
         ET.SubElement(nowele, 'title').text = self.title
         ET.SubElement(nowele, 'link').text = self.link
-        ET.SubElement(nowele, 'description').text = self.plantform + self.ep
+        ET.SubElement(nowele, 'description').text = self.plantform + str(self.ep)
         return feedsrc
 
     # 匹配剧集平台
@@ -134,6 +135,7 @@ class UpdateInfo:
         self.title = result['title']
         self.ep = result['bvid']
         self.link = "https://bilibili.com/" + self.ep
+
 
 def main():
     # flag = False
