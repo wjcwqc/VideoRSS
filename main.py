@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bsp
 import json
 import xml.etree.ElementTree as ET
 import time
+from retry import retry
 
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
@@ -23,6 +24,12 @@ class TencentLenError(Exception):
         self.message = message
 
 
+class bimiCopyright(Exception):
+    def __init__(self, message='This bimi animation cause a Error'):
+        super().__init__(message)
+        self.message = message
+
+
 class UpdateInfo:
     # 一步到位，数据采集
     def __init__(self, url):
@@ -35,6 +42,7 @@ class UpdateInfo:
             'link': self.link
         }
 
+    # 更新feed文件
     def updatefeed(self, feedsrc):
         nowele = ET.SubElement(feedsrc[0], 'item')
         ET.SubElement(nowele, 'title').text = self.title
@@ -111,17 +119,41 @@ class UpdateInfo:
         return
 
     # bimiacg数据采集
+    @retry(bimiCopyright, tries=2)
     def bimiacg(self):
         try:
             result = bsp(requests.get(self.url).content, 'html5lib')
-        except Exception:
+        except:
             time.sleep(10)
             result = bsp(requests.get(self.url).content, 'html5lib')
-        self.title = result.head.title.text.split('无修版-百度云盘-动漫全集在线观看-bimibimi')[0]
-        result = result.find('ul', {"class": "player_list"}).find_all('li')[-1]
-        self.ep = result.text
-        self.link = bimilink + result.a.get('href')
-        return
+        self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
+        #  print(self.url, result.find('ul', {"class": "player_list"}))
+        # 2021.4.17 下面这行出错可能由于，采集页面显示错误导致
+        # 处理方法：强制跳转到/paly/1/1进行播放在查询集数
+        try:
+            result = result.find('ul', {"class": "player_list"}).find_all('li')[-1]
+            self.ep = result.text
+            self.link = bimilink + str(result.a.get('href'))
+            return
+        except:
+            self.url = self.url.replace("/bi/", "/") + "play/1/1"
+            raise bimiCopyright
+
+    # def bimiacg(self):
+    #     self.url = self.url.replace("/bi/", "/") + "play/1/1"
+    #     try:
+    #         result = bsp(requests.get(self.url).content, 'html5lib')
+    #     except:
+    #         time.sleep(10)
+    #         result = bsp(requests.get(self.url).content, 'html5lib')
+    #     self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
+    #     #  print(self.url, result.find('ul', {"class": "player_list"}))
+    #     # 2021.4.17 下面这行出错可能由于，采集页面显示错误导致
+    #     # 处理方法：强制跳转到/paly/1/1进行播放在查询集数
+    #     result = result.body.find('ul', {"class": "player_list"}).find_all('li')[-1]
+    #     self.ep = result.text
+    #     self.link = bimilink + result.a.get('href')
+    #     return
 
     def bilimanga(self):
         pass
