@@ -17,6 +17,8 @@ bimilink = "http://www.bimiacg.com"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
+def timeStampExec():
+    return str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
 class TencentLenError(Exception):
     def __init__(self, message='text is not as long as contents'):
@@ -37,7 +39,7 @@ class UpdateInfo:
         getattr(self, self.recognize())()
         self.info = {
             'title': self.title,
-            'plantform': self.plantform,
+            'platform': self.platform,
             'episode': self.ep,
             'link': self.link
         }
@@ -47,7 +49,9 @@ class UpdateInfo:
         nowele = ET.SubElement(feedsrc[0], 'item')
         ET.SubElement(nowele, 'title').text = self.title
         ET.SubElement(nowele, 'link').text = self.link
-        ET.SubElement(nowele, 'description').text = self.plantform + str(self.ep)
+        ET.SubElement(nowele, 'description').text = self.platform + str(self.ep)
+        ET.SubElement(nowele, 'time').text = timeStampExec()
+        print(("[{0}] {1} {2} update success.").format(timeStampExec(), self.title, self.ep))
         return feedsrc
 
     # 匹配剧集平台
@@ -60,7 +64,7 @@ class UpdateInfo:
         # elif rec =='bilibili':
         #     self.bilibili()
         # elif rec==
-        self.plantform = rec
+        self.platform = rec
         return rec
 
     # 腾讯视频数据采集
@@ -126,7 +130,9 @@ class UpdateInfo:
         except:
             time.sleep(10)
             result = bsp(requests.get(self.url).content, 'html5lib')
-        self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
+        # self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
+        # 上面的标题方法在下面的异常处理后错误所以使用下面方法进行更新
+        self.title = result.find_all('strong')[-1].text
         #  print(self.url, result.find('ul', {"class": "player_list"}))
         # 2021.4.17 下面这行出错可能由于，采集页面显示错误导致
         # 处理方法：强制跳转到/paly/1/1进行播放在查询集数
@@ -138,22 +144,6 @@ class UpdateInfo:
         except:
             self.url = self.url.replace("/bi/", "/") + "play/1/1"
             raise bimiCopyright
-
-    # def bimiacg(self):
-    #     self.url = self.url.replace("/bi/", "/") + "play/1/1"
-    #     try:
-    #         result = bsp(requests.get(self.url).content, 'html5lib')
-    #     except:
-    #         time.sleep(10)
-    #         result = bsp(requests.get(self.url).content, 'html5lib')
-    #     self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
-    #     #  print(self.url, result.find('ul', {"class": "player_list"}))
-    #     # 2021.4.17 下面这行出错可能由于，采集页面显示错误导致
-    #     # 处理方法：强制跳转到/paly/1/1进行播放在查询集数
-    #     result = result.body.find('ul', {"class": "player_list"}).find_all('li')[-1]
-    #     self.ep = result.text
-    #     self.link = bimilink + result.a.get('href')
-    #     return
 
     def bilimanga(self):
         pass
@@ -172,6 +162,7 @@ class UpdateInfo:
 def main():
     # flag = False
     # updateinfo = None
+    print('[' + timeStampExec() + '] update start!')
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
@@ -182,19 +173,20 @@ def main():
                 try:
                     newInfo.updatefeed(rsstree)
                 except:
+                    print(("[{0}] {1} update failed.").format(timeStampExec(), i))
                     rsstree = ET.parse('feed.xml')
                     rss = rsstree.getroot()
                     rsstree = newInfo.updatefeed(rss)
                 # todo
-        time.sleep(10)
     file.close()
     try:
         ET.ElementTree(rsstree).write('feed.xml', encoding='utf-8')
         with open("list.json", 'w') as file:
             json.dump(context, file)
         file.close()
+        print('[' + timeStampExec() + '] XML file update success!')
     except:
-        print('XML file writed Fault!')
+        print('[' + timeStampExec() + '] XML file update failed or nothing need to be updated!')
     return
 
 
