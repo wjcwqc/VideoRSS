@@ -6,6 +6,6 @@ test.py
 beta.*
 templist.txt
 TODO.md
-log.*
+*log*
 *temp*
 *bak*

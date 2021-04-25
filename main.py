@@ -4,6 +4,9 @@ import json
 import xml.etree.ElementTree as ET
 import time
 from retry import retry
+import logging
+import sys
+import addList
 
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
@@ -17,8 +20,9 @@ bimilink = "http://www.bimiacg.com"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
+
 def timeStampExec():
-    return str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    return str(time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
 
 class TencentLenError(Exception):
     def __init__(self, message='text is not as long as contents'):
@@ -51,7 +55,8 @@ class UpdateInfo:
         ET.SubElement(nowele, 'link').text = self.link
         ET.SubElement(nowele, 'description').text = self.platform + str(self.ep)
         ET.SubElement(nowele, 'time').text = timeStampExec()
-        print(("[{0}] {1} {2} update success.").format(timeStampExec(), self.title, self.ep))
+        # print(("[{0}] {1} {2} update success.").format(timeStampExec(), self.title, self.ep))
+        logger.debug("{0} {1} update success.".format(self.title, self.ep))
         return feedsrc
 
     # 匹配剧集平台
@@ -80,10 +85,7 @@ class UpdateInfo:
         for i in contents:
             if type(i) != 'bs4.element.Tag':
                 contents.remove(i)
-        # if len(text) == len(contents):
-        # print(len(text),len(contents))
         num = len(text)
-        # print(text,contents)
         text.reverse()
         contents.reverse()
         if text[0].find('展开更多') >= 0:
@@ -162,10 +164,19 @@ class UpdateInfo:
 def main():
     # flag = False
     # updateinfo = None
-    print('[' + timeStampExec() + '] update start!')
+
+    logging.basicConfig(filename='VideoRSS.log',
+                        format="[%(asctime)s]%(levelname)s:%(message)s",
+                        datefmt="%Y/%m/%d %H:%M:%S",
+                        )
+    logger = logging.getLogger()
+    # print('[' + timeStampExec() + '] update start!')
+    logger.debug("Update start!")
+    logger.setLevel(logging.ERROR)
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
+            logger.debug(i + "start")
             newInfo = UpdateInfo(i)
             # print(newInfo.info)
             if i not in context['lastest'] or context['lastest'][i] != newInfo.info:
@@ -173,22 +184,31 @@ def main():
                 try:
                     newInfo.updatefeed(rsstree)
                 except:
-                    print(("[{0}] {1} update failed.").format(timeStampExec(), i))
+                    # print(("[{0}] {1} update failed.").format(timeStampExec(), i))
+                    logger.warning(i + " update failed.")
                     rsstree = ET.parse('feed.xml')
                     rss = rsstree.getroot()
                     rsstree = newInfo.updatefeed(rss)
-                # todo
     file.close()
     try:
         ET.ElementTree(rsstree).write('feed.xml', encoding='utf-8')
         with open("list.json", 'w') as file:
-            json.dump(context, file)
+            json.dump(context, file, indent=4)
         file.close()
-        print('[' + timeStampExec() + '] XML file update success!')
+        # print('[' + timeStampExec() + '] XML file update success!')
+        logger.debug("XML file update success!")
     except:
-        print('[' + timeStampExec() + '] XML file update failed or nothing need to be updated!')
+        # print('[' + timeStampExec() + '] XML file update failed or nothing need to be updated!')
+        logger.info("XML file update failed or nothing need to be updated!")
     return
 
 
 if __name__ == '__main__':
+    if sys.argv != None:
+        try:
+            tup = sys.argv[1:]
+            addList.add(tup)
+
+        except Exception as e:
+            print(sys.argv)
     main()
