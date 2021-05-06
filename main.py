@@ -24,6 +24,7 @@ biliep = "https://www.bilibili.com/bangumi/play/ep"
 def timeStampExec():
     return str(time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
 
+
 class TencentLenError(Exception):
     def __init__(self, message='text is not as long as contents'):
         super().__init__(message)
@@ -172,7 +173,7 @@ def main():
                         datefmt="%Y/%m/%d %H:%M:%S",
                         )
     logging.debug("Update start!")
-    logging.setLevel(logging.ERROR)
+    # logger.setLevel(logging.ERROR)
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
