@@ -171,14 +171,12 @@ def main():
                         format="[%(asctime)s]%(levelname)s:%(message)s",
                         datefmt="%Y/%m/%d %H:%M:%S",
                         )
-    logger = logging.getLogger()
-    # print('[' + timeStampExec() + '] update start!')
-    logger.debug("Update start!")
-    logger.setLevel(logging.ERROR)
+    logging.debug("Update start!")
+    logging.setLevel(logging.ERROR)
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
-            logger.debug(i + "start")
+            logging.debug(i + "start")
             newInfo = UpdateInfo(i)
             # print(newInfo.info)
             if i not in context['lastest'] or context['lastest'][i] != newInfo.info:
@@ -187,7 +185,7 @@ def main():
                     newInfo.updatefeed(rsstree)
                 except:
                     # print(("[{0}] {1} update failed.").format(timeStampExec(), i))
-                    logger.warning(i + " update failed.")
+                    logging.warning(i + " update failed.")
                     rsstree = ET.parse('feed.xml')
                     rss = rsstree.getroot()
                     rsstree = newInfo.updatefeed(rss)
@@ -198,10 +196,10 @@ def main():
             json.dump(context, file, indent=4)
         file.close()
         # print('[' + timeStampExec() + '] XML file update success!')
-        logger.debug("XML file update success!")
+        logging.debug("XML file update success!")
     except:
         # print('[' + timeStampExec() + '] XML file update failed or nothing need to be updated!')
-        logger.info("XML file update failed or nothing need to be updated!")
+        logging.info("XML file update failed or nothing need to be updated!")
     return
 
 
