@@ -56,7 +56,7 @@ class UpdateInfo:
         ET.SubElement(nowele, 'description').text = self.platform + str(self.ep)
         ET.SubElement(nowele, 'time').text = timeStampExec()
         # print(("[{0}] {1} {2} update success.").format(timeStampExec(), self.title, self.ep))
-        logger.debug("{0} {1} update success.".format(self.title, self.ep))
+        logging.debug("{0} {1} update success.".format(self.title, self.ep))
         return feedsrc
 
     # 匹配剧集平台
@@ -86,13 +86,14 @@ class UpdateInfo:
             if type(i) != 'bs4.element.Tag':
                 contents.remove(i)
         num = len(text)
-        text.reverse()
-        contents.reverse()
-        if text[0].find('展开更多') >= 0:
+        # 原版采用列表逆序从头查找，现在采用text[-1]和__reversed__方法减少逆序时间
+        # text.reverse()
+        # contents.reverse()
+        if text[-1].find('展开更多') >= 0:
             self.tencent2()
             return
         else:
-            for i in range(num):
+            for i in range(num).__reversed__():
                 if text[i].isdigit():
                     self.ep = text[i]
                     self.link = contents[i].find('a').get('href')
@@ -143,8 +144,9 @@ class UpdateInfo:
             self.ep = result.text
             self.link = bimilink + str(result.a.get('href'))
             return
-        except:
+        except AttributeError as e:
             self.url = self.url.replace("/bi/", "/") + "play/1/1"
+            logging.debug("{0} cause a Copyright block! details:{1}".format(self.link, e))
             raise bimiCopyright
 
     def bilimanga(self):
@@ -208,7 +210,6 @@ if __name__ == '__main__':
         try:
             tup = sys.argv[1:]
             addList.add(tup)
-
         except Exception as e:
             print(sys.argv)
     main()
