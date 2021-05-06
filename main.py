@@ -147,7 +147,7 @@ class UpdateInfo:
             return
         except AttributeError as e:
             self.url = self.url.replace("/bi/", "/") + "play/1/1"
-            logging.debug("{0} cause a Copyright block! details:{1}".format(self.link, e))
+            # logging.debug("{0} cause a Copyright block! details:{1}".format(self.link, e))
             raise bimiCopyright
 
     def bilimanga(self):
