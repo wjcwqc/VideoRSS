@@ -10,13 +10,13 @@ import addList
 
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
-          'www.bimiacg.com': 'bimiacg',
+          'www.bimiacg.net': 'bimiacg',
           'manga.bilibili.com': 'bilimanga',
           'space.bilibili.com': 'bilichannel'
           }
 bilimd = "https://api.bilibili.com/pgc/review/user"
 biliss = "https://api.bilibili.com/pgc/web/season/section"
-bimilink = "http://www.bimiacg.com"
+bimilink = "http://www.bimiacg.net"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
@@ -134,6 +134,8 @@ class UpdateInfo:
         except:
             time.sleep(10)
             result = bsp(requests.get(self.url).content, 'html5lib')
+        print(self.url)
+        print(result.contents)
         # self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
         # 上面的标题方法在下面的异常处理后错误所以使用下面方法进行更新
         self.title = result.find_all('strong')[-1].text
