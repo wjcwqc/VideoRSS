@@ -10,13 +10,13 @@ import addList
 
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
-          'www.bimiacg.net': 'bimiacg',
+          'www.bimiacg4.net': 'bimiacg',
           'manga.bilibili.com': 'bilimanga',
           'space.bilibili.com': 'bilichannel'
           }
 bilimd = "https://api.bilibili.com/pgc/review/user"
 biliss = "https://api.bilibili.com/pgc/web/season/section"
-bimilink = "http://www.bimiacg.net"
+bimilink = "http://www.bimiacg4.net"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
@@ -130,10 +130,10 @@ class UpdateInfo:
     @retry(bimiCopyright, tries=2)
     def bimiacg(self):
         try:
-            result = bsp(requests.get(self.url).content, 'html5lib')
+            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
         except:
             time.sleep(10)
-            result = bsp(requests.get(self.url).content, 'html5lib')
+            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
         # print(self.url)
         # print(result.contents)
         # self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
