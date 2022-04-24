@@ -1,4 +1,5 @@
 import requests
+import urllib3
 from bs4 import BeautifulSoup as bsp
 import json
 import xml.etree.ElementTree as ET
@@ -11,18 +12,27 @@ import addList
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
           'www.bimiacg4.net': 'bimiacg',
-          'manga.bilibili.com': 'bilimanga',
-          'space.bilibili.com': 'bilichannel'
+          'www.bimiacg5.net': 'bimiacg',
+          'space.bilibili.com': 'bilichannel',
+          'www.dm233.me': 'dm233'
           }
 bilimd = "https://api.bilibili.com/pgc/review/user"
 biliss = "https://api.bilibili.com/pgc/web/season/section"
-bimilink = "http://www.bimiacg4.net"
+bimilink = "https://www.bimiacg4.net"
+bimilinkbak = "https://www.bimiacg5.net"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
+dmtv = "https://www.dm233.me"
 
 
 def timeStampExec():
     return str(time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()))
+
+
+class requestError(Exception):
+    def __init__(self, message="request Error"):
+        super().__init__(message)
+        self.message = message
 
 
 class TencentLenError(Exception):
@@ -74,10 +84,14 @@ class UpdateInfo:
         return rec
 
     # 腾讯视频数据采集
+    @retry(requestError,tries=2)
     def tencent(self):
         result = requests.get(self.url).content
         result = bsp(result, 'html5lib')
-        self.title = result.head.title.text.split("-")[0]
+        try:
+            self.title = result.head.title.text.split("-")[0]
+        except:
+            raise requestError
         result = result.find(attrs={"class": "mod_episode"})
         text = result.text.replace('\t', '').splitlines()
         while '' in text:
@@ -130,10 +144,10 @@ class UpdateInfo:
     @retry(bimiCopyright, tries=2)
     def bimiacg(self):
         try:
-            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
+            result = bsp(requests.get(self.url, verify=False).content, 'html5lib')
         except:
-            time.sleep(10)
-            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
+            # sleep(10)
+            result = bsp(requests.get(self.url, verify=False).content, 'html5lib')
         # print(self.url)
         # print(result.contents)
         # self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
@@ -152,10 +166,6 @@ class UpdateInfo:
             # logging.debug("{0} cause a Copyright block! details:{1}".format(self.link, e))
             raise bimiCopyright
 
-    def bilimanga(self):
-        pass
-        return
-
     def bilichannel(self):
         biliuid, bilicid = self.url.split('/')[3], self.url.split('cid=')[1]
         result = json.loads(requests.get(bilich,
@@ -165,22 +175,38 @@ class UpdateInfo:
         self.ep = result['bvid']
         self.link = "https://bilibili.com/" + self.ep
 
+    def dm233(self):
+        result = bsp(requests.get(self.url, verify=False).content, "html5lib")
+        # print(result)
+        self.title = result.find("h1", {"class": "h1-title"}).text
+        print(self.title,type(self.title))
+        result = result.find("div", {"class": "zxundis"}).ul.findAll('a')[-1]
+        self.ep = result.get("title")
+        print(self.ep)
+        self.link = dmtv + result.get("href")
+        print(self.link)
+
 
 def main():
     # flag = False
     # updateinfo = None
-
+    urllib3.disable_warnings()
     logging.basicConfig(filename='VideoRSS.log',
                         format="[%(asctime)s]%(levelname)s:%(message)s",
                         datefmt="%Y/%m/%d %H:%M:%S",
                         )
     logging.debug("Update start!")
-    # logger.setLevel(logging.ERROR)
+    logger.setLevel(logging.ERROR)
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
             logging.debug(i + "start")
+            # try:
             newInfo = UpdateInfo(i)
+            # except Exception as e:
+            #     print(e)
+            #     print(i)
+            #     break
             # print(newInfo.info)
             if i not in context['lastest'] or context['lastest'][i] != newInfo.info:
                 context['lastest'][i] = newInfo.info
