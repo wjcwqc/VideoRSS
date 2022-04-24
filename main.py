@@ -1,4 +1,5 @@
 import requests
+import urllib3
 from bs4 import BeautifulSoup as bsp
 import json
 import xml.etree.ElementTree as ET
@@ -11,12 +12,13 @@ import addList
 urlist = {'v.qq.com': 'tencent',
           'www.bilibili.com': 'bilibili',
           'www.bimiacg4.net': 'bimiacg',
-          'manga.bilibili.com': 'bilimanga',
+          'www.bimiacg5.net': 'bimiacg',
           'space.bilibili.com': 'bilichannel'
           }
 bilimd = "https://api.bilibili.com/pgc/review/user"
 biliss = "https://api.bilibili.com/pgc/web/season/section"
-bimilink = "http://www.bimiacg4.net"
+bimilink = "https://www.bimiacg4.net"
+bimilinkbak = "https://www.bimiacg5.net"
 bilich = "https://api.bilibili.com/x/space/channel/video"
 biliep = "https://www.bilibili.com/bangumi/play/ep"
 
@@ -130,10 +132,9 @@ class UpdateInfo:
     @retry(bimiCopyright, tries=2)
     def bimiacg(self):
         try:
-            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
+            result = bsp(requests.get(self.url, verify=False).content, 'html5lib')
         except:
-            time.sleep(10)
-            result = bsp(requests.get(self.url,verify=False).content, 'html5lib')
+            result = bsp(requests.get(self.url, verify=False).content, 'html5lib')
         # print(self.url)
         # print(result.contents)
         # self.title = result.head.title.text.replace('无修版-百度云盘-动漫全集在线观看-bimibimi', '')
@@ -152,10 +153,6 @@ class UpdateInfo:
             # logging.debug("{0} cause a Copyright block! details:{1}".format(self.link, e))
             raise bimiCopyright
 
-    def bilimanga(self):
-        pass
-        return
-
     def bilichannel(self):
         biliuid, bilicid = self.url.split('/')[3], self.url.split('cid=')[1]
         result = json.loads(requests.get(bilich,
@@ -169,7 +166,7 @@ class UpdateInfo:
 def main():
     # flag = False
     # updateinfo = None
-
+    urllib3.disable_warnings()
     logging.basicConfig(filename='VideoRSS.log',
                         format="[%(asctime)s]%(levelname)s:%(message)s",
                         datefmt="%Y/%m/%d %H:%M:%S",
