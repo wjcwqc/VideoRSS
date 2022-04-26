@@ -196,7 +196,7 @@ def main():
                         datefmt="%Y/%m/%d %H:%M:%S",
                         )
     logging.debug("Update start!")
-    logger.setLevel(logging.ERROR)
+    # logger.setLevel(logging.ERROR)
     with open("list.json", 'r') as file:
         context = json.load(file)
         for i in context['subscribe']:
